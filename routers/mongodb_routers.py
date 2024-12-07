@@ -62,6 +62,36 @@ def GetCollectionData(database: str, collection: str):
     json_data = dumps(documents)
     return json_data
 
+#Retorna a última data de um documento
+@router.get("/last")
+def GetLastDocument(database: str, collection: str):
+    uri = os.environ.get("MONGODB_URI")
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    db = client[database]
+    collection = db[collection]
+
+    #document = list(collection.find().sort([('_id', -1)]).limit(1))[0]
+    document = collection.find_one(sort=[('_id', -1)])
+    document.pop('_id', None)
+
+    json_data = dumps(document)
+    return json_data
+
+#Retorna os tickers de ações
+@router.get("/tickers")
+def GetTickers():
+    uri = os.environ.get("MONGODB_URI")
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    db = client['Stocks']
+    collection = db['Info']
+
+    tickers = list(collection.find())
+
+    tickers = [ticker['ticker'] for ticker in tickers]
+
+    json_data = dumps(tickers)
+    return json_data
+
 #------------------------------------------------------------NÃO TESTADO------------------------------------------------------------
 
 @router.post("/{database}/{collection}/")

@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from routers.mongodb_routers import router as mongodb_router
 from routers.yfinance_routers import router as yfinance_router
+from routers.bcb_routers import router as bcb_router
 import routers.yfinance_routers as y_methods
 
 api = FastAPI()
 api.include_router(mongodb_router)
 api.include_router(yfinance_router)
+api.include_router(bcb_router)
 
 #porta do render é por padrão a 10000
 
@@ -24,3 +26,6 @@ def add_newStock(ticker: str):
         return y_methods.GetStockInfo(ticker)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+#.venv\Scripts\activate    
+#uvicorn main:api --reload --port 8000
