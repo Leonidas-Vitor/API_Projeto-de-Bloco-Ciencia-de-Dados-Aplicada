@@ -16,7 +16,7 @@ def Status():
     try:
         return requests.get('https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados',
                      params={'formato':'json', 'dataInicial':'01/01/2024', 'dataFinal':'02/01/2024'},
-                     timeout=10)
+                     timeout=10).status_code == 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao acessar o Banco Central: {str(e)}")
 
