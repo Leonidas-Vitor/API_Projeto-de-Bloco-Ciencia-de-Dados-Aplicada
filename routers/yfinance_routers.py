@@ -12,23 +12,15 @@ router = APIRouter(
 @router.get("/")
 def Status():
     '''
-    Retorna código 200 se o serviço estiver disponível
+    Retorna código 202 se o serviço estiver disponível
     '''
     try:
         test_ticker = yf.Ticker("AAPL")
         data = test_ticker.history(period="1d")
-        if not data.empty:
-            return 200  # Retorna 200 se os dados forem recebidos com sucesso
-        else:
-            return 204  # Sem conteúdo, mas a requisição foi bem-sucedida
+        return not data.empty
     except Exception as e:
-        # Mapeia erros comuns
-        if "ConnectionError" in str(e):
-            return 503  # Serviço indisponível
-        elif "HTTPError" in str(e):
-            return 500  # Erro interno da API
-        else:
-            return 400  # Erro genérico de requisição
+        raise HTTPException(status_code=500, detail=f"Erro ao acessar o Banco Central: {str(e)}")
+
 
 @router.get("/stock-monthly-price", response_model=StockPrices)
 def GetStockData(stockParams: StockParams = Depends()):

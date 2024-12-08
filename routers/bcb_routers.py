@@ -14,10 +14,9 @@ def Status():
     Retorna código 200 se o serviço estiver disponível
     '''
     try:
-        status = requests.get('https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados',
+        return requests.get('https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados',
                      params={'formato':'json', 'dataInicial':'01/01/2024', 'dataFinal':'02/01/2024'},
-                     timeout=10).response
-        return status
+                     timeout=10)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao acessar o Banco Central: {str(e)}")
 
