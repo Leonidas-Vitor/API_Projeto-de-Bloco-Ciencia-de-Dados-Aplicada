@@ -4,6 +4,7 @@ from pymongo.server_api import ServerApi
 import os
 from pydantic import BaseModel, Field
 from bson.json_util import dumps
+from typing import List
 
 #ResponseModels
 class StockPrice(BaseModel):
@@ -92,19 +93,40 @@ def GetTickers():
     json_data = dumps(tickers)
     return json_data
 
-#------------------------------------------------------------NÃO TESTADO------------------------------------------------------------
-
+#Adiciona documentos a uma collection
 @router.post("/{database}/{collection}/")
-def InsertData(database: str, collection: str, data: dict):
-    return {"status": "Not implemented yet!"}
+def InsertData(database: str, collection: str, data: List[dict]):
+    try:
+        uri = os.environ.get("MONGODB_URI")
+        client = MongoClient(uri, server_api=ServerApi('1'))
+        db = client[database]
+        collection = db[collection]
+
+        collection.insert_many(data)
+
+        return {"status": "Data inserted successfully!"}
+    except Exception as e:
+        return {"status": "Failed to insert data!", "error": str(e)}
+
+#Checa se um documento existe
+@router.get("/{database}/{collection}/check")
+def CheckDocument(database: str, collection: str, filter: str):
     uri = os.environ.get("MONGODB_URI")
     client = MongoClient(uri, server_api=ServerApi('1'))
     db = client[database]
     collection = db[collection]
+    filter = eval(filter)
+    document = collection.find_one(filter)
 
-    collection.insert_one(data)
+    if document:
+        return True
+    else:
+        return False
 
-    return {"status": "Data inserted successfully!"}
+
+
+#------------------------------------------------------------NÃO TESTADO------------------------------------------------------------
+
 
 @router.delete("/{database}/{collection}/")
 def DeleteData(database: str, collection: str, filter: dict):

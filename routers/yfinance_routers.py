@@ -30,19 +30,19 @@ def GetStockData(stockParams: StockParams = Depends()):
     else:
         history = ticker.history(period=stockParams.period)
 
-    #Remover o mês incompleto, se existir
-    last_date = history.index[-1]
-    year = last_date.year
-    month = last_date.month
-    last_day = calendar_services.get_days_in_month(year, month)
-    if last_date.day < last_day:
-        history = history[:-1]
-
     if not history.empty:
         # Remover informações de fuso horário, se existirem
         if history.index.tz is not None:
             history.index = history.index.tz_localize(None)
         history['year-month'] = history.index.to_period('M').strftime('%Y-%m')
+
+        #Remover o mês incompleto, se existir
+        last_date = history.index[-1]
+        year = last_date.year
+        month = last_date.month
+        last_day = calendar_services.get_days_in_month(year, month)
+        if last_date.day < last_day:
+            history = history[history['year-month'] != last_date.strftime('%Y-%m')]
 
         media_mensal = history.groupby('year-month')['Close'].mean()
         media_mensal = pd.DataFrame(media_mensal)
