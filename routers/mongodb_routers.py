@@ -4,7 +4,7 @@ from pymongo.server_api import ServerApi
 import os
 from pydantic import BaseModel, Field
 from bson.json_util import dumps
-from typing import List
+from typing import List, Dict
 
 #ResponseModels
 class StockPrice(BaseModel):
@@ -95,18 +95,20 @@ def GetTickers():
 
 #Adiciona documentos a uma collection
 @router.post("/{database}/{collection}/")
-def InsertData(database: str, collection: str, data: List[dict]):
+def InsertData(database: str, collection: str, data : str):
     try:
         uri = os.environ.get("MONGODB_URI")
         client = MongoClient(uri, server_api=ServerApi('1'))
         db = client[database]
         collection = db[collection]
 
+        data = eval(data)
         collection.insert_many(data)
 
-        return {"status": "Data inserted successfully!"}
+        return dumps({"status": "Data inserted successfully!"})
     except Exception as e:
-        return {"status": "Failed to insert data!", "error": str(e)}
+        return dumps({"status": "Failed to insert data!", "error": str(e), })
+
 
 #Checa se um documento existe
 @router.get("/{database}/{collection}/check")
